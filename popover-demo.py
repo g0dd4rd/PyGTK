@@ -1,7 +1,10 @@
+import subprocess
+
 import gi
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gdk, Gio, Gtk
+gi.require_version('WebKit2', '4.0')
+from gi.repository import Gdk, Gio, Gtk, WebKit2
 
 class PopoverWindow(Gtk.Window):
 
@@ -17,6 +20,7 @@ class PopoverWindow(Gtk.Window):
 
         self.textview = Gtk.TextView()
         self.textview.set_editable(True)
+        self.textview.set_wrap_mode(Gtk.WrapMode.WORD)
         self.textview.connect("button-release-event", self.on_text_selected)
         self.textbuffer = self.textview.get_buffer()
         self.textbuffer.set_text("This is some text inside of a Gtk.TextView. "
@@ -26,8 +30,12 @@ class PopoverWindow(Gtk.Window):
 
         self.popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        vbox.pack_start(Gtk.ModelButton("Item 1"), False, True, 10)
-        vbox.pack_start(Gtk.Label("Item 2"), False, True, 10)
+        self.dictionarymbtn = Gtk.ModelButton("Dictionary")
+        self.dictionarymbtn.connect("button-press-event", self.dict_query)
+        vbox.pack_start(self.dictionarymbtn, False, True, 10)
+        self.gtranslate = Gtk.ModelButton("gTranslate")
+        self.gtranslate.connect("button-press-event", self.gtranslate_query)
+        vbox.pack_start(self.gtranslate, False, True, 10)
         self.popover.add(vbox)
         self.popover.set_position(Gtk.PositionType.BOTTOM)
         self.popover.set_constrain_to(Gtk.PopoverConstraint.NONE)
@@ -35,11 +43,19 @@ class PopoverWindow(Gtk.Window):
     def on_text_selected(self, bounds, widget):
         bounds = self.textbuffer.get_selection_bounds()
         if len(bounds) != 0:
+            self.word = self.textbuffer.get_text(bounds[0], bounds[1], False)
+            
             self.popover.set_relative_to(self.textview)
             rect_loc = self.textview.get_cursor_locations(bounds[0])
             self.popover.set_pointing_to(rect_loc[0])
             self.popover.show_all()
             self.popover.popup()
+
+    def dict_query(self, widget, x):
+        subprocess.run(["firefox", "--new-tab", "https://www.dictionary.com/browse/"+ self.word])
+
+    def gtranslate_query(self, widget, y):
+        subprocess.run(["firefox", "--new-tab", "https://translate.google.com/#view=home&op=translate&sl=en&tl=cs&text="+ self.word])
 
 win = PopoverWindow()
 win.connect("destroy", Gtk.main_quit)
