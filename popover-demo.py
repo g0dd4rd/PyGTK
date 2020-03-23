@@ -31,10 +31,10 @@ class PopoverWindow(Gtk.Window):
         self.popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.dictionarymbtn = Gtk.ModelButton("Dictionary")
-        self.dictionarymbtn.connect("button-press-event", self.dict_query)
+        self.dictionarymbtn.connect("button-press-event", self.on_dict_query)
         vbox.pack_start(self.dictionarymbtn, False, True, 10)
-        self.gtranslate = Gtk.ModelButton("gTranslate")
-        self.gtranslate.connect("button-press-event", self.gtranslate_query)
+        self.gtranslate = Gtk.ModelButton("Translate")
+        self.gtranslate.connect("button-press-event", self.on_translate_query)
         vbox.pack_start(self.gtranslate, False, True, 10)
         self.popover.add(vbox)
         self.popover.set_position(Gtk.PositionType.BOTTOM)
@@ -51,10 +51,10 @@ class PopoverWindow(Gtk.Window):
             self.popover.show_all()
             self.popover.popup()
 
-    def dict_query(self, widget, x):
+    def on_dict_query(self, widget, x):
         subprocess.run(["firefox", "--new-tab", "https://www.dictionary.com/browse/"+ self.word])
 
-    def gtranslate_query(self, widget, y):
+    def on_translate_query(self, widget, y):
         subprocess.run(["firefox", "--new-tab", "https://translate.google.com/#view=home&op=translate&sl=en&tl=cs&text="+ self.word])
 
 win = PopoverWindow()
