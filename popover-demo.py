@@ -52,10 +52,16 @@ class PopoverWindow(Gtk.Window):
             self.popover.popup()
 
     def on_dict_query(self, widget, x):
-        subprocess.run(["firefox", "--new-tab", "https://www.dictionary.com/browse/"+ self.word])
+        self.get_default_browser()
+        subprocess.run([self.get_default_browser(), "--new-tab", "https://www.dictionary.com/browse/"+ self.word])
 
     def on_translate_query(self, widget, y):
-        subprocess.run(["firefox", "--new-tab", "https://translate.google.com/#view=home&op=translate&sl=en&tl=cs&text="+ self.word])
+        subprocess.run([self.get_default_browser(), "--new-tab", "https://translate.google.com/#view=home&op=translate&sl=en&tl=cs&text="+ self.word])
+
+    def get_default_browser(self):
+        default_browser = subprocess.run(["xdg-settings", "get", "default-web-browser"],
+        stdout = subprocess.PIPE)
+        return str(default_browser.stdout).split(".")[0].split("'")[1]
 
 win = PopoverWindow()
 win.connect("destroy", Gtk.main_quit)
